@@ -81,5 +81,8 @@ firstup <- function(x) {
 }
 
 d3 <- d3 %>% 
-    dplyr::mutate(scientificName = firstup(scientificNameL))
+    dplyr::mutate(scientificName = firstup(scientificNameL)) %>% 
+    dplyr::select(-scientificNameL)
+
+write.csv(d3, file = "data/cleanData.csv", row.names = F)
 
