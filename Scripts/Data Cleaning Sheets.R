@@ -74,3 +74,12 @@ d3 <- d2 %>%
 
 sort(unique(d3$scientificNameL))
 
+#' function to capitalize first letter in string
+firstup <- function(x) {
+    substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+    x
+}
+
+d3 <- d3 %>% 
+    dplyr::mutate(scientificName = firstup(scientificNameL))
+
