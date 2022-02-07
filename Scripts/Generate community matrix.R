@@ -48,5 +48,5 @@ d3 <- d2 %>%
 #Generate community matrix with only site
 m2 <- matrify(d3)
 
-write.csv(m2, "data/communitymatrixSite.csv", row.names = FALSE)
+write.csv(m2, "data/communitymatrixSite.csv")
 
