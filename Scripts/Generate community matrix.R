@@ -46,7 +46,14 @@ d3 <- d2 %>%
     select(Site, scientificName, Count)
 
 #Generate community matrix with only site
-m2 <- matrify(d3)
 
-write.csv(m2, "data/communitymatrixSite.csv")
+
+gb <- d %>% 
+    group_by(Site, scientificName) %>% 
+    summarise(abundance = sum(Count, na.rm = T)) %>%
+    as.data.frame()
+
+m3 <- matrify(gb)
+
+write.csv(m3, "data/communitymatrixSite.csv")
 

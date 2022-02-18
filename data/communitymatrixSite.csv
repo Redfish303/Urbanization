@@ -1,10 +1,10 @@
 "","Acanalonia servillei","Alcaeorrhynchus grandis","Anomala innuba","Blattella asahinai","Callistethus marginatus","Calosoma scrutator","Camponotus castaneus","Camponotus floridanus","Chauliodes rastricornis","Climaciella brunnea","Corydalus cornutus","Cybister fimbriolatus","Dichotomius carolinus","Dicomatispa interrupta","Draeculacephala inscripta","Erythroneura calyculata","Euphoria sepulcralis","Graminella cognita","Harmonia axyridis","Hydaticus bimarginatus","Hydrophlus ovatus","Lethocerus uhleri","Lytta polita","Mallodon dasystomus","Megalodacne fasciata","Melanolestes picipes","Necrophila americana","Neoconocephalus triops","Neoscapteriscus borellii","None","Odontotaenuius disjunctus","Pelidnota punctata","Periplaneta americana","Phileurus truncatus","Phileurus valgus","Plecia nearctica","Prionus imbricornis","Prionus pocularis","Prosapia bicincta","Rhiginia cruciata","Stilpnochlora couliana","Tabanus atratus","Tylozygus bifidus","Tylozygus geometricus"
-"Auca",0,0,1,1,3,0,0,1,3,0,1,2,1,0,3,0,0,0,1,1,1,1,0,0,0,2,1,0,3,1,0,0,0,0,1,1,0,1,1,0,1,0,0,0
-"Baca",1,0,8,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,1,0,0,0,1,0
-"Biva",0,0,1,0,3,0,3,2,1,0,1,1,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,0,1,4,0,1,4,0,0,0,0,0
-"Bowa",1,0,0,0,1,0,1,2,1,0,0,6,1,0,3,0,0,0,0,4,0,1,1,0,0,0,2,0,0,1,0,1,0,0,1,12,1,1,15,0,0,0,0,0
-"Cofr",1,0,1,0,1,0,1,1,1,0,0,1,0,1,0,2,0,0,0,1,1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,2,1,1,0,0,0,0,0
-"Demi",5,1,1,0,1,0,0,0,1,0,0,1,1,0,0,2,1,0,0,1,0,2,0,0,1,0,1,0,0,1,0,1,0,1,0,6,1,1,2,0,0,0,0,0
-"Joma",1,0,3,1,1,1,1,2,1,1,2,1,0,0,0,0,0,0,1,2,1,2,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,0
-"Prcr",1,0,1,0,1,0,1,1,1,0,1,2,0,0,2,0,0,0,0,1,1,2,0,1,1,0,2,0,1,1,1,1,0,1,1,1,2,1,3,1,0,0,1,7
-"Rist",1,1,28,0,1,0,8,2,1,0,0,0,1,0,12,0,0,1,0,1,1,2,0,0,1,0,0,1,1,1,0,1,0,0,1,3,0,1,2,0,0,1,8,3
+"Auca",0,0,32,1,226,0,0,5,20,0,10,16,4,0,7,0,0,0,2,61,2,3,0,0,0,2,2,0,4,9,0,0,0,0,1,10,0,2,150,0,4,0,0,0
+"Baca",5,0,14,4,27,0,0,3,0,0,0,0,0,0,0,0,0,0,1,57,0,1,0,0,0,0,0,0,0,15,0,2,0,0,0,0,0,1,1,0,0,0,1,0
+"Biva",0,0,1,0,12,0,3,4,18,0,1,1,0,0,2,0,0,0,0,77,2,3,1,0,2,0,0,0,0,10,0,1,1,0,1,19,0,1,27,0,0,0,0,0
+"Bowa",1,0,0,0,7,0,1,8,9,0,0,10,1,0,7,0,0,0,0,41,0,1,1,0,0,0,2,0,0,15,0,4,0,0,4,35,14,1,57,0,0,0,0,0
+"Cofr",5,0,5,0,38,0,1,2,3,0,0,9,0,1,0,2,0,0,0,285,1,1,0,1,1,0,0,0,0,15,0,3,0,0,0,12,2,2,13,0,0,0,0,0
+"Demi",6,1,3,0,3,0,0,0,7,0,0,2,1,0,0,2,1,0,0,116,0,5,0,0,6,0,1,0,0,11,0,4,0,1,0,25,1,1,2,0,0,0,0,0
+"Joma",3,0,5,1,14,1,2,2,35,1,3,2,0,0,0,0,0,0,2,68,3,3,0,0,0,0,0,0,0,9,0,1,0,1,0,5,0,1,9,0,0,0,1,0
+"Prcr",3,0,1,0,96,0,3,7,25,0,6,5,0,0,17,0,0,0,0,179,9,2,0,1,1,0,4,0,1,11,2,1,0,1,2,33,6,2,104,4,0,0,1,7
+"Rist",11,3,67,0,16,0,28,21,41,0,0,0,2,0,117,0,0,1,0,46,2,3,0,0,3,0,0,1,2,7,0,3,0,0,1,8,0,6,29,0,0,2,8,6

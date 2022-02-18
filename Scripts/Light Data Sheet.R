@@ -3,6 +3,7 @@ library(dplyr)
 
 d <- read_sheet("https://docs.google.com/spreadsheets/d/199ZGN6cTT6H0izlWo0rJ77ZL4YkYQDgwkgnQUxfX4YA/edit#gid=0")
 
+#summarise light readings by site
 d2 <- d %>% 
     filter(E != "NA") %>% 
     rowwise() %>% 

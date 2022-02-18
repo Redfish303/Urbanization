@@ -86,4 +86,3 @@ d3 <- d3 %>%
     dplyr::select(-scientificNameL)
 
 write.csv(d3, file = "data/cleanData.csv", row.names = F)
-
