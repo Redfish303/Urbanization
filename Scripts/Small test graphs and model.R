@@ -113,4 +113,16 @@ ggplot(rich, mapping = aes(x = Dev_1, y = richness)) +
     geom_smooth(method = "lm",  show.legend = FALSE) +
     theme_classic() 
 
+#richness on 1 and 10km scale
+modelRich <- lm(formula = richness ~ Dev_1,
+                  na.action = "na.fail",
+              data = rich)
 
+modelRich2 <- lm(formula = richness ~ Dev_10,
+            na.action = "na.fail",
+            data = rich)
+
+AICc(modelRich, modelRich2)
+
+sjPlot::plot_model(modelRich, terms = "Dev_1", type = "pred")
+sjPlot::plot_model(modelRich2, terms = "Dev_10", type = "pred")
