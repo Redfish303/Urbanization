@@ -126,3 +126,20 @@ AICc(modelRich, modelRich2)
 
 sjPlot::plot_model(modelRich, terms = "Dev_1", type = "pred")
 sjPlot::plot_model(modelRich2, terms = "Dev_10", type = "pred")
+
+## community weighted mean
+cwm <- cm_long_urbanization %>% 
+    group_by(Site) %>% 
+    summarise(
+        BodySize_cwm =weighted.mean(BodySize, abundance, na.rm=T)
+    )
+
+cwm_urb <- left_join(cwm, urb)
+
+head(cwm_urb)
+
+ggplot(cwm_urb, mapping = aes(x = BodySize_cwm, y = Dev_10)) +
+    geom_point() +
+    geom_smooth(method = "lm")
+
+# CWM model
