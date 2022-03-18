@@ -65,9 +65,6 @@ top_model <- get.models(dd, subset = 1)[[1]]
 car::vif(top_model)
 summary(top_model)
 
-sjPlot::plot_model(top_model, terms = c("Dev_1","LHSCategory"), type = "pred")
-sjPlot::plot_model(top_model, terms = c("Dev_1","VoltinismCategory"), type = "pred", ci.lvl = NA)
-
 ## model this at a 10 km scale for imprevious surface
 model2 <- lmer(formula = abundance ~ Dev_10 + 
                   LHSCategory:Dev_10 + VoltinismCategory:Dev_10 + 
@@ -90,18 +87,14 @@ top_model2 <- get.models(dd2, subset = 1)[[1]]
 car::vif(top_model2)
 summary(top_model2)
 
-sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "pred", ci.lvl = NA)
-sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "pred", ci.lvl = NA)
-
-
 ## look into AICs of 1km and 10km
 AICc(top_model, top_model2) # our top top model is top model 2
 
 top_model <- top_model2
 summary(top_model2)
 
-sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "pred", ci.lvl = NA)
-sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "pred", ci.lvl = NA)
+sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "eff", title = "")
+sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "eff", title = "")
 
 
 ### test for richness
