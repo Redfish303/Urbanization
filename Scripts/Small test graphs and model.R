@@ -27,9 +27,7 @@ cm_long_urbanization <- left_join(cm_long, urb)
 ## combine with trait data
 traits <- read.csv("data/TraitData.csv")
 cm_long_urbanization <- left_join(cm_long_urbanization, traits, 
-                                  by = c("scientific_name" = "Species")) %>% 
-      mutate(Dev_1 = asin(sqrt(Dev_1)), # Attempt to make proportion developed into a more 
-       Dev_10 = asin(sqrt(Dev_10)))     # normally distributed data
+                                  by = c("scientific_name" = "Species")) # normally distributed data
 
 #plot all species abundance by urbanization amount with colors and slopes per spp.
 ggplot(cm_long_urbanization, mapping = aes(x = Dev_1, y = abundance, color = scientific_name)) +
@@ -67,7 +65,7 @@ top_model <- get.models(dd, subset = 1)[[1]]
 car::vif(top_model)
 summary(top_model)
 
-sjPlot::plot_model(top_model, terms = c("Dev_1","LHSCategory"), type = "pred", ci.lvl = NA)
+sjPlot::plot_model(top_model, terms = c("Dev_1","LHSCategory"), type = "pred")
 sjPlot::plot_model(top_model, terms = c("Dev_1","VoltinismCategory"), type = "pred", ci.lvl = NA)
 
 ## model this at a 10 km scale for imprevious surface
@@ -76,6 +74,13 @@ model2 <- lmer(formula = abundance ~ Dev_10 +
                   LarvalHabitatCategory:Dev_10 + BodySize:Dev_10 +
                   (1 | scientific_name), na.action = "na.fail",
               data = mdf)
+
+model2 <- lmer(formula = abundance ~ Dev_10_trans + 
+                   LHSCategory:Dev_10 + VoltinismCategory:Dev_10 + 
+                   LarvalHabitatCategory:Dev_10 + BodySize:Dev_10 +
+                   (1 | scientific_name), na.action = "na.fail",
+               data = mdf)
+
 
 summary(model2)
 
