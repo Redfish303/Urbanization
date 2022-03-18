@@ -93,9 +93,20 @@ AICc(top_model, top_model2) # our top top model is top model 2
 top_model <- top_model2
 summary(top_model2)
 
-sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "eff", title = "")
-sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "eff", title = "")
+volt <- sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "eff", title = "")
+volt + 
+    scale_color_viridis_d()+ 
+    scale_fill_viridis_d() +
+    labs(x = "Proportion urbanization (10-km)", y = "Abundance", color = "Voltinism") +
+    theme_classic()
 
+LHS <- sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "eff", title = "") 
+
+LHS + 
+    scale_color_viridis_d(option = "inferno")+ 
+    scale_fill_viridis_d(option = "inferno") +
+    labs(x = "Proportion urbanization (10-km)", y = "Abundance", color = "Larval diet") +
+    theme_classic()
 
 ### test for richness
 rich <- cm_long_urbanization %>% 
