@@ -85,5 +85,3 @@ df_sum <- df_sum %>%
            med_lat_dif = med_lat - 29.6429)
 
 #save lat dif dataframe
-
-write.csv(x = df_sum, file = "data/latitude_difference.csv", row.names = F)
