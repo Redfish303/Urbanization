@@ -10,8 +10,8 @@ library(ggplot2)
 # when you do this for all species, you can just read in your gbif download
 df <- fread("", 
             select = c("scientificName", 
-                           "decimalLongitude", "decimalLatitude", 
-                           "year", "eventDate")) # use this function to read in gbif download
+                       "decimalLongitude", "decimalLatitude", 
+                       "year", "eventDate")) # use this function to read in gbif download
 
 # for our example we will use Prionus pocularis
 # Prionus pocularis
@@ -65,25 +65,39 @@ df <- df %>%
         true = "Prionus pocularis Dalman, 1817",
         false = scientificName
     )) %>%  
-    filter(scientificName != "BOLD:AAH3594") %>% 
-    mutate(decimalLongitude = round(decimalLongitude, digits = 4),
-             decimalLatitude = round(decimalLatitude, digits = 4)) %>% 
-    distinct(decimalLongitude, decimalLatitude, .keep_all = T)
+    filter(scientificName != "BOLD:AAH3594")
 
 
-df_sum <- df %>% 
+#800m resolution
+# read in temperature raster file
+t <- rast("data/bio1.tif")
+
+#precipitation raster file
+p <- rast('data/bio12.tif')
+
+#extract the temp/precip values for each unique data point per species
+#first pull out species from out filtered data frame and retain only 
+
+
+df_coords <- df[,2:3]
+#extracts temperature for each data point
+temp_e <- extract(t, df_coords)
+precip_e <- extract(p,df_coords)
+
+#combine this with species df
+df_climate <- df %>% 
+    mutate(temp = temp_e$bio1,
+            precip = precip_e$bio12) %>% 
+    filter(!is.na(temp), !is.na(precip))
+
+ggplot() +
+    geom_point(df_climate, mapping = aes(x = temp, y = precip, color = scientificName),
+               alpha = 0.5) +
+    theme_bw()
+
+#calculate niche breadth
+
+niche_df <- df_climate %>% 
     group_by(scientificName) %>% 
-    summarise(max_lat = quantile(decimalLatitude, probs = 0.9),
-              min_lat = quantile(decimalLatitude, probs = 0.1),
-              med_lat = median(decimalLatitude))
-
-#Then Calculate the difference of these  values to the latitude of BACA, which is 29.6429
-
-df_sum <- df_sum %>% 
-    mutate(max_lat_dif = max_lat - 29.6429,
-           min_lat_dif = min_lat - 29.6429,
-           med_lat_dif = med_lat - 29.6429)
-
-#save lat dif dataframe
-
-write.csv(x = df_sum, file = "data/latitude_difference.csv", row.names = F)
+    summarise(temp_niche = sd(temp),
+              precip_niche = sd(precip))

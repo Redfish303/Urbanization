@@ -85,4 +85,9 @@ d3 <- d3 %>%
     dplyr::mutate(scientificName = firstup(scientificNameL)) %>% 
     dplyr::select(-scientificNameL)
 
+d4 <- d3 %>% 
+    group_by(scientificName,Site) %>% 
+    summarize(SiteCount = sum(Count))
+    
+
 write.csv(d3, file = "data/cleanData.csv", row.names = F)

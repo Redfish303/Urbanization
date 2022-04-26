@@ -6,6 +6,10 @@ library(ggplot2)
 library(lmerTest)
 library(sjPlot)
 library(MuMIn)
+library(ggeffects)
+library(ggpubr)
+library(effects)
+library(rr2)
 ### script to analyze effect of urbanization on overall abundace by species
 
 #read in abundance data
@@ -72,11 +76,11 @@ model2 <- lmer(formula = abundance ~ Dev_10 +
                   (1 | scientific_name), na.action = "na.fail",
               data = mdf)
 
-model2 <- lmer(formula = abundance ~ Dev_10_trans + 
-                   LHSCategory:Dev_10 + VoltinismCategory:Dev_10 + 
-                   LarvalHabitatCategory:Dev_10 + BodySize:Dev_10 +
-                   (1 | scientific_name), na.action = "na.fail",
-               data = mdf)
+#model2 <- lmer(formula = abundance ~ Dev_10_trans + 
+ #                  LHSCategory:Dev_10 + VoltinismCategory:Dev_10 + 
+  #                 LarvalHabitatCategory:Dev_10 + BodySize:Dev_10 +
+   #                (1 | scientific_name), na.action = "na.fail",
+    #           data = mdf)
 
 
 summary(model2)
@@ -89,9 +93,11 @@ summary(top_model2)
 
 ## look into AICs of 1km and 10km
 AICc(top_model, top_model2) # our top top model is top model 2
+Weights(AICc(top_model, top_model2))
 
 top_model <- top_model2
 summary(top_model2)
+r.squaredGLMM(top_model2)
 
 volt <- sjPlot::plot_model(top_model2, terms = c("Dev_10","VoltinismCategory"), type = "eff", title = "")
 volt + 
@@ -100,6 +106,8 @@ volt +
     labs(x = "Proportion urbanization (10-km)", y = "Abundance", color = "Voltinism") +
     theme_classic()
 
+ggsave("voltinism.png")
+
 LHS <- sjPlot::plot_model(top_model2, terms = c("Dev_10","LHSCategory"), type = "eff", title = "") 
 
 LHS + 
@@ -107,6 +115,8 @@ LHS +
     scale_fill_viridis_d(option = "inferno") +
     labs(x = "Proportion urbanization (10-km)", y = "Abundance", color = "Larval diet") +
     theme_classic()
+
+ggsave("LHS.png")
 
 ### test for richness
 rich <- cm_long_urbanization %>% 
@@ -137,12 +147,12 @@ Weights(AICc(modelRich, modelRich2))
 
 a <- sjPlot::plot_model(modelRich, terms = "Dev_1", type = "pred", title = "")
 
-library(ggpubr)
-
 a +
     geom_point(rich, mapping = aes(x = Dev_1, y = richness)) +
     labs(x = "Proportion urbanization (1-km)", y = "Species richness") +
     theme_classic()
+
+ggsave("richness.png")
 
 ## community weighted mean
 cwm <- cm_long_urbanization %>% 
@@ -175,3 +185,19 @@ b +
     geom_point(cwm_urb, mapping = aes(x = Dev_10, y = BodySize_cwm)) +
     labs(x = "Proportion urbanization (1-km)", y = "Body Size CWM") +
     theme_classic()
+
+ggsave("CMW.png")
+
+
+
+voltanismSize <- na.omit(cm_long_urbanization) %>% 
+  group_by(VoltinismCategory) %>% 
+  summarise(avg = mean(BodySize))
+
+dietSize <- na.omit(cm_long_urbanization) %>% 
+  group_by(LHSCategory) %>% 
+  summarise(avg = mean(BodySize))
+            
+            
+            
+            
