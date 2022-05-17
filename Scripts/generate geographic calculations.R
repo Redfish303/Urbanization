@@ -612,7 +612,7 @@ pointsToRemove3 <- df %>%
                decimalLatitude < 20)
 pointsToRemove4 <- df %>% 
     filter(scientificName == 'Camponotus floridanus (Buckley, 1866)' & 
-               decimalLongitude < -100)
+               decimalLongitude < -97)
 pointsToRemove5 <- df %>% 
     filter(scientificName == 'Chauliodes rastricornis Rambur, 1842' & 
                decimalLongitude < -100)
