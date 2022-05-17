@@ -6,7 +6,7 @@ library(data.table)
 library(rnaturalearth)
 library(ggplot2)
 
-df_geo <- read.csv('data/geographicdata')
+df_geo <- read.csv('data/cleanindOccurences.csv')
 
 # let's look where these occurrences are
 # first grab a basemap of North and South america
@@ -49,5 +49,5 @@ ggplot() +
 
 niche_df <- df_climate %>% 
     group_by(scientificName) %>% 
-    summarise(temp_niche = sd(temp),
-              precip_niche = sd(precip))
+    summarise(temp_niche = sd(temp, na.rm = T),
+              precip_niche = sd(precip, na.rm = T))

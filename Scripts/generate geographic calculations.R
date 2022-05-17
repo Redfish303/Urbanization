@@ -576,6 +576,95 @@ ggplot() +
     theme_classic()+
     facet_wrap(~scientificName)
 
+ggsave('Figures/outliers.pdf', width = 50, height = 36)
+
+plot_sppOccs <- function(x){
+    
+    print(x)
+    
+    pdf <- df %>% 
+        filter(scientificName == x)
+    
+    ggplot() +
+        geom_sf(americas, mapping = aes(), fill = NA) +
+        geom_point(pdf, mapping = aes(x = decimalLongitude, y = decimalLatitude)) +
+        theme_classic()
+    
+    ggsave(paste('Figures/outliers', x, '.png', sep = '_'),
+           width = 5, height = 5)
+}
+
+sf_use_s2(FALSE)
+lapply(unique(df$scientificName), plot_sppOccs)
+
+#removing outliers on a species specific basis
+df <- df %>% 
+    mutate(id = 1:nrow(df))
+
+pointsToRemove1 <- df %>% 
+    filter(scientificName == 'Acanalonia servillei Spinola, 1839' &
+               decimalLatitude < 20)
+pointsToRemove2 <- df %>% 
+    filter(scientificName == 'Anomala innuba (Fabricius, 1787)' & 
+               decimalLongitude < -100)
+pointsToRemove3 <- df %>% 
+    filter(scientificName == 'Camponotus castaneus (Latreille, 1802)' & 
+               decimalLatitude < 20)
+pointsToRemove4 <- df %>% 
+    filter(scientificName == 'Camponotus floridanus (Buckley, 1866)' & 
+               decimalLongitude < -100)
+pointsToRemove5 <- df %>% 
+    filter(scientificName == 'Chauliodes rastricornis Rambur, 1842' & 
+               decimalLongitude < -100)
+pointsToRemove6 <- df %>% 
+    filter(scientificName == 'Corydalus cornutus (Linnaeus, 1758)' & 
+               decimalLongitude > 60)
+pointsToRemove7 <- df %>% 
+    filter(scientificName == 'Euphoria sepulcralis (Fabricius, 1801)' & 
+               decimalLongitude > -24)
+pointsToRemove8 <- df %>% 
+    filter(scientificName == 'Euphoria sepulcralis (Fabricius, 1801)' & 
+               decimalLatitude < 0)
+pointsToRemove9 <- df %>% 
+    filter(scientificName == 'Hydrophilus ovatus Gemminger & Harold, 1868' & 
+               decimalLatitude > 50)
+pointsToRemove10 <- df %>% 
+    filter(scientificName == 'Lethocerus uhleri (Montandon, 1896)' & 
+               decimalLatitude > 45)
+pointsToRemove11 <- df %>% 
+    filter(scientificName == 'Lytta polita Say, 1824' & 
+               decimalLongitude < -100)
+pointsToRemove12 <- df %>% 
+    filter(scientificName == 'Mallodon dasystomum (Say, 1824)' & 
+               decimalLongitude < -115)
+pointsToRemove13 <- df %>% 
+    filter(scientificName == 'Necrophila americana (Linnaeus, 1758)' & 
+               decimalLongitude > -50)
+pointsToRemove14 <- df %>% 
+    filter(scientificName == 'Lethocerus uhleri (Montandon, 1896)' & 
+               decimalLatitude > 45)
+pointsToRemove15 <- df %>% 
+    filter(scientificName == 'Neoconocephalus triops (Linnaeus, 1758)' & 
+               decimalLatitude > 45)
+pointsToRemove16 <- df %>% 
+    filter(scientificName == 'Neoscapteriscus borellii (Giglio-Tos, 1894)' & 
+               decimalLongitude > -65)
+pointsToRemove17 <- df %>% 
+    filter(scientificName == 'Odontotaenius disjunctus (Illiger, 1800)' & 
+               decimalLongitude > -65)
+pointsToRemove18 <- df %>% 
+    filter(scientificName == 'Neoscapteriscus borellii (Giglio-Tos, 1894)' & 
+               decimalLatitude < 20)
+
+ptr <- rbind(pointsToRemove1, pointsToRemove2, pointsToRemove3, pointsToRemove4, pointsToRemove5,
+             pointsToRemove6, pointsToRemove7, pointsToRemove8, pointsToRemove9, pointsToRemove10,
+             pointsToRemove11, pointsToRemove12, pointsToRemove13, pointsToRemove14, pointsToRemove15,
+             pointsToRemove16, pointsToRemove17, pointsToRemove18)
+
+df <- df %>% 
+    filter(!df$id %in% ptr$id)
+
+write.csv(df, file = 'data/cleanindOccurences.csv', row.names = F)
 #calculate high, low, and median latitudes for species.
 #First, remove NA for lat and long
 
