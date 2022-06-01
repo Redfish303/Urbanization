@@ -9,3 +9,5 @@ li <- lunar.illumination(unique(as.Date(df$Date)))
 
 li_df <- data.frame(Date = unique(as.Date(df$Date)),
                     lunar.phase = li)
+
+write.csv(li_df, file = "data/lunarIllumination.csv", row.names = F)
