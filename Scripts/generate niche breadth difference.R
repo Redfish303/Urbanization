@@ -51,3 +51,5 @@ niche_df <- df_climate %>%
     group_by(scientificName) %>% 
     summarise(temp_niche = sd(temp, na.rm = T),
               precip_niche = sd(precip, na.rm = T))
+
+write.csv(niche_df, file = 'data/nicheData.csv')
