@@ -42,5 +42,13 @@ lm <- lmer(peakDoy ~ Dev_10 +
                Dev_10:VoltinismCategory
            + (1|scientificName), data = peakCount)
 
+summary(lm)
+
+resids <- residuals(lm)
+hist(resids)
+qqnorm(resids)
+qqline(resids)
+shapiro.test(resids)
+
 sjPlot::plot_model(lm, type = "eff", terms = c("Dev_10", "LHSCategory"))
     
