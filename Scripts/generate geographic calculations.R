@@ -683,5 +683,5 @@ df_sum <- df_sum %>%
 
 #save lat dif dataframe
 
-write.csv(df_sum, file = "data/geographicdata", row.names = F)
+write.csv(df_sum, file = "data/geographicdata.csv", row.names = F)
 
