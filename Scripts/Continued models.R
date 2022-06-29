@@ -10,7 +10,6 @@ library(ggeffects)
 library(ggpubr)
 library(effects)
 library(rr2)
-library(stringr)
 
 #Script to run continued models
 
@@ -36,16 +35,20 @@ light <- read.csv("data/lightData.csv")
 cm_long_urbanization <- left_join(cm_long_urbanization, light)
 
 #Can't Join this and niche because of how we named the species in those
-range <- read.csv("data/geographicdata.csv")
+range <- read.csv("data/geographicdata.csv") %>% 
+    mutate(scientific_name = word(scientificName, start = 1, end = 2)) %>% 
+    select(-scientificName)
+cm_long_urbanization <- left_join(cm_long_urbanization, range)
 
 niche <- read.csv("data/nichedata.csv") %>% 
-cm_long_urbanization <- left_join(cm_long_urbanization, niche,
-                                  by = c("scientific_name" = "scientificName"))
+    mutate(scientific_name = word(scientificName, start = 1, end = 2)) %>% 
+    select(-scientificName)
+cm_long_urbanization <- left_join(cm_long_urbanization, niche)
 
-#matching species name for niche data
-species <- data.frame(unique(cm_long$scientific_name)) %>% 
-    rename(scientificName = unique.cm_long.scientific_name.)
-    left_join(species, niche,
-              by = c("ID" = "X"))
-           
-    
+cm_long_urbanization <- cm_long_urbanization %>% 
+    select(-X, -max_lat, -min_lat, -med_lat)
+
+mdf <- cm_long_urbanization %>% 
+    na.omit
+
+write.csv(mdf, file = "data/modelData.csv")
