@@ -14,13 +14,30 @@ df <- read.csv('data/cleanData.csv') %>%
 
 head(df)
 
-peakCount <- df %>%
+#Need to only estimate peakdoy if a species was observed at a site on three unique days
+
+uniqueDays <- df %>% 
     group_by(scientificName, Site) %>% 
-    summarise(peakDoy = doy2[which.max(Count)])
+    summarise(uniqueDaysObs = length(unique(doy2))) #Makes a variable of the amount of days it was found
 
+peakCount <- left_join(df, uniqueDays) %>%
+    filter(uniqueDaysObs >= 3) %>% 
+    group_by(scientificName, Site) %>% 
+    summarise(peakDoy = doy2[which.max(Count)]) #Here we have joined this new variable to the df and filters for more than 3
+
+#Find the species that have enough uniqueDaysObs at 3 or more sites
+enoughObs <- peakCount %>% 
+    group_by(scientificName) %>% 
+    summarise(nSites = length(unique(Site))) %>% 
+    filter(nSites >= 3)
+
+#Filter peak count to only include species with enoughObs >= 3
+peakCount <- peakCount %>% 
+    filter(scientificName %in% enoughObs$scientificName) %>% 
+    filter(scientificName != "None")
+
+#Join with other data
 urb <- read.csv("data/impervious_surface.csv")
-
-
 
 peakCount <- left_join(peakCount, urb)
 
@@ -42,7 +59,21 @@ lm <- lmer(peakDoy ~ Dev_10 +
                Dev_10:VoltinismCategory
            + (1|scientificName), data = peakCount)
 
-summary(lm)
+lm.1 <- lmer(peakDoy ~ Dev_1 +
+               Dev_1:LHSCategory +
+               Dev_1:BodySize +
+               Dev_1:LarvalHabitatCategory +
+               Dev_1:VoltinismCategory
+           + (1|scientificName), data = peakCount)
+
+summary(lm.1)
+
+dd <- MuMIn::dredge(model)
+s <- step(lm)
+top_model <- get.models(dd, subset = 1)[[1]]
+car::vif(top_model)
+summary(top_model)
+r.squaredGLMM(model)
 
 resids <- residuals(lm)
 hist(resids)
@@ -51,4 +82,12 @@ qqline(resids)
 shapiro.test(resids)
 
 sjPlot::plot_model(lm, type = "eff", terms = c("Dev_10", "LHSCategory"))
+
+sjPlot::plot_model(lm, type = "eff", terms = c("Dev_10", "BodySize"))
+
+sjPlot::plot_model(lm, type = "eff", terms = c("Dev_10", "LarvalHabitatCategory"))
+
+sjPlot::plot_model(lm, type = "eff", terms = c("Dev_10", "VoltinismCategory"))
+#Standing water species vs running water species and how they are impacted by differences in ambient temp
+#Lentic - Running Lotic - standing
     
