@@ -10,9 +10,12 @@ library(ggeffects)
 library(ggpubr)
 library(effects)
 library(rr2)
+library(cowplot)
 
 #Script to run continued models
+setwd()
 
+#### Creating Model Dataframe ####
 cm <- read.csv("data/communitymatrixSite.csv")
 
 cm_long <- cm %>% 
@@ -68,12 +71,13 @@ write.csv(mdf, file = "data/modelData.csv")
 abun <- mdf$abundance
 
 mdf <- mdf %>% 
+    mutate(mean_temp = mean_temp * -1) %>% 
     mutate_if(is.numeric, scale)
 
 mdf <- mdf %>% 
     mutate(abundance = abun)
 
-###Model and top model for 1km scale Development
+#### Abundance Modeling ####
 
 model1 <- glmer(formula = abundance ~ 
                   LHSCategory:Dev_1 + VoltinismCategory:Dev_1 + 
@@ -93,6 +97,7 @@ model1.5 <- glmer(formula = abundance ~
                 control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
                 data = mdf)
 
+## Selected Model for 1km spatial scale ###
 model1.5.1 <- glmer(formula = abundance ~ 
                     VoltinismCategory:Dev_1 + 
                     LarvalHabitatCategory:Dev_1 + BodySize:Dev_1 +
@@ -102,8 +107,8 @@ model1.5.1 <- glmer(formula = abundance ~
                 control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
                 data = mdf)
 
+summary(model1.5.1)
 
-#Chosen model based on VIF
 model1.5.2 <- glmer(formula = abundance ~ 
                       LHSCategory:Dev_1 + VoltinismCategory:Dev_1 + 
                       LarvalHabitatCategory:Dev_1 +
@@ -133,8 +138,7 @@ model2.5 <- glmer(formula = abundance ~ Dev_1 +
                 control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
                 data = mdf)
 
-summary(model1)
-
+summary(model2.5)
 
 s <- stats::step(model)
 top_model_Dev1<- get.models(dd, subset = 2)[[1]]
@@ -157,6 +161,7 @@ qqnorm(resids)
 qqline(resids)
 shapiro.test(resids)
 
+summary(model1.5.1)
 #SJplot of 1.5.1 correlation
 plot_model(model1.5.1, type = "eff", terms = c("Dev_1", "VoltinismCategory"))
 
@@ -195,8 +200,9 @@ model <- glmer(formula = abundance ~ Dev_10 +
 
 dd <- MuMIn::dredge(model)
 top_model_Dev10.2 <- get.models(dd, subset = 1)[[1]]
-car::vif(top_model)
-summary(top_model)
+car::vif(top_model_Dev10.2)
+summary(top_model_Dev10.2)
+r.squaredGLMM(top_model_Dev10.2)
 
 #Checking Assumptions
 resids <- residuals(top_model_Dev10.2)
@@ -207,21 +213,58 @@ shapiro.test(resids)
 
 #SJplots of 10km Scale Results
 
-plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "VoltinismCategory"))
+c <- plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "VoltinismCategory"),
+                legend.title = 'Voltinism', title = '',
+                    axis.title = c('Proportion urbanization (10-km)','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+c<- c + 
+    scale_color_discrete()
 
-plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "LarvalHabitatCategory"))
+a <- plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "LarvalHabitatCategory"),
+                legend.title = 'Larval Habitat', title = '',
+                axis.title = c('Proportion urbanization (10-km)','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+a <- a + 
+    scale_color_discrete()
 
-plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "BodySize"))
+d <- plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "max_lat_dif"),
+                legend.title = 'Species Geographic Range', title = '',
+                axis.title = c('Proportion urbanization (10-km)','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+d <- d + 
+    scale_color_discrete(labels = c("At Northern Extent", "At Mean Extent", "At Southern Extent"))
 
-plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "max_lat_dif"))
 
-plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "LHSCategory"))
+
+b <- plot_model(top_model_Dev10.2, type = "eff", terms = c("Dev_10", "LHSCategory"),
+                legend.title = 'Larval Diet', title = '',
+                axis.title = c('Proportion urbanization (10-km)','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+b <- b + 
+    scale_color_discrete()
+
+Figure1 <- cowplot::plot_grid(b,a,c,d, labels = c("A","B","C","D"), label_size = 12, nrow = 2, ncol = 2)
+
+Figure1 
 
 #Compare 1km and 10km Scales
-AICc(model1.5.1, top_model_Dev10.2)
+AICc(model1.5.1, top_model_Dev10.2) ###10Km scale explains more variation
+Weights(model1.5.1, top_model_Dev10.2)
 
+#### Light modeling ####
 
-#Light model
 lightModel <- glmer(formula = abundance ~ meanLight + 
                   VoltinismCategory:meanLight + LHSCategory:meanLight +
                   BodySize:meanLight + max_lat_dif:meanLight + min_lat_dif:meanLight +
@@ -239,22 +282,58 @@ car::vif(top_model_light)
 summary(top_model_light)
 r.squaredGLMM(model)
 
-lightModel.1 <- glmer(formula = abundance ~ meanLight + 
+## Selected Light Model ##
+lightModel.1 <- glmer(formula = abundance ~  
                           LHSCategory:meanLight + ## LHSCategory is not showing up
-                          BodySize:meanLight + min_lat_dif:meanLight +
-                          LarvalHabitatCategory:meanLight +
-                          precip_niche:meanLight + (1 | scientific_name),
+                          BodySize:meanLight + max_lat_dif:meanLight +
+                          LarvalHabitatCategory:meanLight + (1 | scientific_name),
                       na.action = "na.fail", family = poisson,
                       control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
                       data = mdf)
 
 summary(lightModel.1)
 
+b <- plot_model(lightModel.1, type = "eff", terms = c("meanLight", "LHSCategory"),
+                legend.title = 'Larval Diet', title = '',
+                axis.title = c('Mean Light at Site','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+b <- b + 
+    scale_color_discrete()
+
+a <- plot_model(lightModel.1, type = "eff", terms = c("meanLight", "LarvalHabitatCategory"),
+                legend.title = 'Larval Habitat', title = '',
+                axis.title = c('Mean Light at Site','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+a <- a + 
+    scale_color_discrete()
+
+c <- plot_model(lightModel.1, type = "eff", terms = c("meanLight", "max_lat_dif"),
+                legend.title = 'Species Geographic Range', title = '',
+                axis.title = c('Mean Light at Site','Predicted Abundance')) + 
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+c <- c + 
+    scale_color_discrete(labels = c("At Northern Extent", "At Mean Extent", "At Southern Extent"))
+
+top_row <- cowplot::plot_grid(b,a, labels = c("A", "B"), nrow = 1, ncol = 2)
+
+Figure2 <- cowplot::plot_grid(top_row,c, labels = c('',"C"), label_size = 12, nrow = 2, ncol = 1)
+Figure2
+
+
 dd <- MuMIn::dredge(lightModel.1)
 top_model_light <- get.models(dd, subset = 1)[[1]]
-car::vif(top_model_light)
+car::vif(lightModel.1)
 summary(top_model_light)
-r.squaredGLMM(model)
+r.squaredGLMM(lightModel.1)
 
 resids <- residuals(top_model_light)
 hist(resids)
@@ -262,35 +341,7 @@ qqnorm(resids)
 qqline(resids)
 shapiro.test(resids)
 
-
-
-###Temperature Model###
- ##are we modeling against the niche or the raw data?
-
-modelTempniche <- glmer(formula = abundance ~ temp_niche +
-                       VoltinismCategory:temp_niche + LHSCategory:temp_niche +
-                       BodySize:temp_niche + max_lat_dif:temp_niche + min_lat_dif:temp_niche +
-                       med_lat_dif:temp_niche + LarvalHabitatCategory:temp_niche +
-                       precip_niche:temp_niche + (1 | scientific_name),
-                   na.action = "na.fail", family = poisson,
-                   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
-                   data = mdf)
-
-summary(modelTempniche)
-
-dd <- MuMIn::dredge(modelTempniche)
-top_model_tempniche <- get.models(dd, subset = 1)[[1]]
-car::vif(top_model_tempniche)
-summary(top_model_tempniche)
-r.squaredGLMM(model)
-
-resids <- residuals(top_model_tempniche)
-hist(resids)
-qqnorm(resids)
-qqline(resids)
-shapiro.test(resids)
-
-
+#### Temperature Modeling ####
 modelTemp <- glmer(formula = abundance ~ mean_temp +
                        VoltinismCategory:mean_temp + LHSCategory:mean_temp +
                        BodySize:mean_temp + max_lat_dif:mean_temp + min_lat_dif:mean_temp +
@@ -306,10 +357,70 @@ dd <- MuMIn::dredge(modelTemp)
 top_model_temp <- get.models(dd, subset = 1)[[1]]
 car::vif(top_model_temp)
 summary(top_model_temp)
-r.squaredGLMM(model)
+r.squaredGLMM(modelTemp)
+
+### Selected Model ###
+modelTemp.1 <- glmer(formula = abundance ~
+                       LHSCategory:mean_temp +
+                       max_lat_dif:mean_temp + LarvalHabitatCategory:mean_temp +
+                       (1 | scientific_name),
+                   na.action = "na.fail", family = poisson,
+                   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)),
+                   data = mdf)
+
+summary(modelTemp.1)
+car::vif(modelTemp.1)
+r.squaredGLMM(modelTemp.1)
 
 resids <- residuals(top_model_temp)
 hist(resids)
 qqnorm(resids)
 qqline(resids)
 shapiro.test(resids)
+
+b <- plot_model(modelTemp.1, type = "eff", terms = c("mean_temp", "LHSCategory"),
+                legend.title = 'Larval Diet', title = '',
+                axis.title = c('Mean Temperature at Site','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+b <- b + 
+    scale_color_discrete()
+
+
+
+a <- plot_model(modelTemp.1, type = "eff", terms = c("mean_temp", "LarvalHabitatCategory"),
+                legend.title = 'Larval Habitat', title = '',
+                axis.title = c('Mean Temperature at Site','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+a <- a +
+    scale_color_discrete()
+
+
+
+c <- plot_model(modelTemp.1, type = "eff", terms = c("mean_temp", "max_lat_dif"),
+                legend.title = 'Species Geographic Range', title = '',
+                axis.title = c('Mean Temperature at Site','Predicted Abundance'))+
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8)+ theme_classic()+
+    theme(legend.position = c(.95, .95),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right")
+c <- c + 
+    scale_color_discrete(labels = c("At Northern Extent", "mean", "At Southern Extent"))
+
+
+
+top_row <- cowplot::plot_grid(b,a, labels = c("A", "B"), nrow = 1, ncol = 2)
+
+Figure3 <- cowplot::plot_grid(top_row,c,labels = c("","C"), label_size = 12, nrow = 2, ncol = 1, rel_widths = 2)
+Figure3
+
+
+setwd()
+ggsave("New Figues/Figure1_Dev_1.png", Figure1, width = 7, height = 7)
+ggsave("New Figues/Figure2_light.png", Figure2, width = 7, height = 7)
+ggsave("New Figues/Figure3_temp.png", Figure3, width = 7, height = 7)
