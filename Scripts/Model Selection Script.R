@@ -78,7 +78,7 @@ mdf <- mdf %>%
     mutate(abundance = abun)
 
 # Abundance Modeling #
-model1 <- glmer(formula = abundance ~ Dev_1 + meanLight + mean_temp +
+model1 <- glmer.nb(formula = abundance ~ Dev_1 + meanLight + mean_temp +
                     LHSCategory:Dev_1 + VoltinismCategory:Dev_1 + 
                     LarvalHabitatCategory:Dev_1 + BodySize:Dev_1 +
                     temp_niche:Dev_1 + 
@@ -90,7 +90,7 @@ model1 <- glmer(formula = abundance ~ Dev_1 + meanLight + mean_temp +
 summary(model1)
 
 
-model1reduced <- glmer(formula = abundance ~ Dev_1 + meanLight + mean_temp +
+model1reduced <- glmer.nb(formula = abundance ~ Dev_1 + meanLight + mean_temp +
                     LHSCategory:Dev_1 +  
                     LarvalHabitatCategory:Dev_1 + 
                     (1 | scientific_name),
@@ -100,11 +100,8 @@ model1reduced <- glmer(formula = abundance ~ Dev_1 + meanLight + mean_temp +
 
 summary(model1reduced)
 
-
 Weights(AICc(model1, model1reduced)) #model1 reduced is our first competing model
 car::vif(model1)
-
-
 
 model2 <- glmer(formula = abundance ~ Dev_1 + meanLight + mean_temp +
                     LHSCategory:meanLight + VoltinismCategory:meanLight + 
@@ -233,3 +230,48 @@ table <- MuMIn::model.sel(model1reduced, model2reduced, model3reduced, model10re
 
 write.csv(table,"model_selection_table.csv")
 
+# test for overdispersion
+library(DHARMa)
+sim_m <- simulateResiduals(model10reduced, refit = T)
+testDispersion(sim_m)
+plot(sim_m)
+
+# figures of top model (model10reduced)
+car::vif(model10reduced)
+
+a <- plot_model(model10reduced, type = "eff", terms = "meanLight") +
+    ggtitle("") +
+    labs(x = "Artificial light at night", y = "Abundance") +
+    theme_classic()
+
+b <- plot_model(model10reduced, type = "eff", terms = "mean_temp") +
+    ggtitle("") +
+    labs(x = "Urban heat island effect", y = "Abundance") +
+    theme_classic()
+
+c <- plot_model(model10reduced, type = "eff", terms = c("Dev_10", "LHSCategory")) +
+    ggtitle("") +
+    labs(x = "Proportion developed (10-km)", y = "Abundance", 
+         color = "Larval diet", fill = "Larval diet") +
+    theme_classic()
+c
+
+d <- plot_model(model10reduced, type = "eff", terms = c("Dev_10", "VoltinismCategory")) +
+    ggtitle("") +
+    labs(x = "Proportion developed (10-km)", y = "Abundance", 
+         color = "Voltinism", fill = "Voltinism") +
+    theme_classic()
+d
+
+e <- plot_model(model10reduced, type = "eff", terms = c("Dev_10", "LarvalHabitatCategory")) +
+    ggtitle("") +
+    labs(x = "Proportion developed (10-km)", y = "Abundance", 
+         color = "Larval habitat", fill = "Larval habitat") +
+    theme_classic()
+e
+
+cp <- plot_grid(c,d,e, labels = c("A", "B", "C"))
+cp
+
+ggsave(filename = "New Figues/modelResult_Interactions.png", dpi = 450, plot = cp,
+       width = 7, height = 5)
