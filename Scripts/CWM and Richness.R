@@ -72,29 +72,25 @@ rich$mean_temp <-  scale(rich$mean_temp)
 rich$meanLight <-  scale(rich$meanLight)
              
 #### Richness Modeling ####
-modelRich <- lm(formula = richness ~ Dev_1 + mean_temp + meanLight,
+modelRich <- lm(formula = richness ~ Dev_1,
                 na.action = "na.fail",
                 data = rich)
-
-modelRich_dd <- dredge(modelRich)
-
-top_model_rich1km = get.models(modelRich_dd,subset = 1)[[1]]
 
 modelRich2 <- lm(formula = richness ~ Dev_10,
                  na.action = "na.fail",
                  data = rich)
 
-modelRich_dd2 <-dredge(modelRich2)
 
-top_model_Rich10km <- get.models(modelRich_dd2, subset = 1)[[1]]
-summary(top_model_Rich10km)
-r.squaredGLMM(top_model_Rich10km)
-
-AICc(top_model_rich1km, top_model_Rich10km)
-Weights(AICc(top_model_rich1km, top_model_Rich10km))
+Weights(AICc(modelRich, modelRich2))
+summary(modelRich)
 
 
+a <- sjPlot::plot_model(modelRich, terms = "Dev_1", type = "pred", title = "") 
 
+a <- a + 
+    geom_point(rich, mapping = aes(x = Dev_1, y = richness)) +
+    labs(x = "Proportion urbanization (1-km)", y = "Species Richness") +
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
 
 
 
@@ -121,10 +117,10 @@ modelCWM2 <- lm(formula = BodySize_cwm ~ Dev_10,
 
 b <- sjPlot::plot_model(modelCWM2, terms = "Dev_10", type = "pred", title = "")
 
-b + 
+b <- b + 
     geom_point(cwm_urb, mapping = aes(x = Dev_10, y = BodySize_cwm)) +
-    labs(x = "Proportion urbanization (1-km)", y = "Body Size CWM") +
-    theme_classic()
+    labs(x = "Proportion urbanization (10-km)", y = "Body Size CWM") +
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
 
 Weights(AICc(modelCWM, modelCWM2))
 summary(modelCWM2)
@@ -153,16 +149,18 @@ modelCWM2 <- lm(formula = tempNiche_cwm ~ Dev_10,
 AICc(modelCWM, modelCWM2)
 Weights(AICc(modelCWM, modelCWM2))
 
-summary(modelCWM2)
+summary(modelCWM)
 
-b <- sjPlot::plot_model(modelCWM2, terms = "Dev_10", type = "pred", title = "")
+c <- sjPlot::plot_model(modelCWM, terms = "Dev_1", type = "pred", title = "")
 
-b + 
-    geom_point(cwm_urb, mapping = aes(x = Dev_10, y = tempNiche_cwm)) +
+c <- c + 
+    geom_point(cwm_urb, mapping = aes(x = Dev_1, y = tempNiche_cwm)) +
     labs(x = "Proportion urbanization (1-km)", y = "Temperature Niche") +
-    theme_classic()
+    font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
 
 ggsave("CWMniche.png", width = 7, height = 7)
+
+
 
 ## Community Weighted Mean Geographic Range Dataframe ##
 
@@ -194,3 +192,16 @@ b +
     theme_classic()
 
 ggsave("CWMrange.png", width = 7, height = 7)
+
+
+
+
+
+Figure4 <- cowplot::plot_grid(a,b,c, labels = c("A", "B", "C"), label_size = 12)
+Figure4
+
+cowplot::save_plot("New Figues/Figure4_CWM.png", Figure4)
+
+
+
+
