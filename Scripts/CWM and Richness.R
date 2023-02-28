@@ -62,15 +62,9 @@ rich <- cm_long_urbanization %>%
     left_join(urb) %>% 
     left_join(tempData) %>% 
     left_join(light) %>% 
-    mutate(mean_temp = mean_temp * -1)
+    mutate(meanLight = log(meanLight + 1),
+           mean_temp = (mean_temp - 1.02) * -1)
 
-
-scalecolumns <- c("Dev_10","Dev_1", "mean_temp", "meanLight")
-rich$Dev_10 <-  scale(rich$Dev_10)
-rich$Dev_1 <-  scale(rich$Dev_1)
-rich$mean_temp <-  scale(rich$mean_temp)
-rich$meanLight <-  scale(rich$meanLight)
-             
 #### Richness Modeling ####
 modelRich <- lm(formula = richness ~ Dev_1,
                 na.action = "na.fail",
@@ -80,18 +74,27 @@ modelRich2 <- lm(formula = richness ~ Dev_10,
                  na.action = "na.fail",
                  data = rich)
 
+modelRich3 <- lm(formula = richness ~ mean_temp,
+                 na.action = "na.fail",
+                 data = rich)
 
-Weights(AICc(modelRich, modelRich2))
+modelRich4 <- lm(formula = richness ~ meanLight,
+                 na.action = "na.fail",
+                 data = rich)
+
+Weights(AICc(modelRich, modelRich2, modelRich3, modelRich4))
+table <- MuMIn::model.sel(modelRich, modelRich2, modelRich3, modelRich4)
+table
 summary(modelRich)
 
 
-a <- sjPlot::plot_model(modelRich, terms = "Dev_1", type = "pred", title = "") 
+a <- sjPlot::plot_model(modelRich4, terms = "meanLight", type = "pred", title = "") 
 
 a <- a + 
-    geom_point(rich, mapping = aes(x = Dev_1, y = richness)) +
-    labs(x = "Proportion urbanization (1-km)", y = "Species Richness") +
+    geom_point(rich, mapping = aes(x = meanLight, y = richness)) +
+    labs(x = "Artificial light at night", y = "Species Richness") +
     font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
-
+a
 
 
 #### Community Weighted Mean Body Size Dataframe ####
@@ -101,7 +104,11 @@ cwm <- cm_long_urbanization %>%
         BodySize_cwm =weighted.mean(BodySize, abundance, na.rm=T)
     )
 
-cwm_urb <- left_join(cwm, urb)
+cwm_urb <- left_join(cwm, urb) %>% 
+    left_join(light) %>% 
+    left_join(tempData) %>% 
+    mutate(meanLight = log(meanLight + 1),
+           mean_temp = (mean_temp - 1.02) * -1)
 
 head(cwm_urb)
 
@@ -115,6 +122,18 @@ modelCWM2 <- lm(formula = BodySize_cwm ~ Dev_10,
                 na.action = "na.fail",
                 data = cwm_urb)
 
+modelCWM3 <- lm(formula = BodySize_cwm ~ mean_temp,
+                na.action = "na.fail",
+                data = cwm_urb)
+
+modelCWM4 <- lm(formula = BodySize_cwm ~ meanLight,
+                na.action = "na.fail",
+                data = cwm_urb)
+
+Weights(AICc(modelCWM, modelCWM2, modelCWM3, modelCWM4))
+table <- MuMIn::model.sel(modelCWM, modelCWM2, modelCWM3, modelCWM4)
+table
+
 b <- sjPlot::plot_model(modelCWM2, terms = "Dev_10", type = "pred", title = "")
 
 b <- b + 
@@ -122,9 +141,7 @@ b <- b +
     labs(x = "Proportion urbanization (10-km)", y = "Body Size CWM") +
     font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
 
-Weights(AICc(modelCWM, modelCWM2))
-summary(modelCWM2)
-r.squaredGLMM(modelCWM2)
+b
 
 ## Community Weight Mean Temperature Niche Dataframe ##
 cwm <- cm_long_urbanization %>% 
@@ -133,7 +150,11 @@ cwm <- cm_long_urbanization %>%
         tempNiche_cwm =weighted.mean(temp_niche, abundance, na.rm=T)
     )
 
-cwm_urb <- left_join(cwm, urb)
+cwm_urb <- left_join(cwm, urb) %>% 
+    left_join(light) %>% 
+    left_join(tempData) %>% 
+    mutate(meanLight = log(meanLight + 1),
+           mean_temp = (mean_temp - 1.02) * -1)
 
 head(cwm_urb)
 
@@ -146,8 +167,17 @@ modelCWM2 <- lm(formula = tempNiche_cwm ~ Dev_10,
                 na.action = "na.fail",
                 data = cwm_urb)
 
-AICc(modelCWM, modelCWM2)
-Weights(AICc(modelCWM, modelCWM2))
+modelCWM3 <- lm(formula = tempNiche_cwm ~ mean_temp,
+                na.action = "na.fail",
+                data = cwm_urb)
+
+modelCWM4 <- lm(formula = tempNiche_cwm ~ meanLight,
+                na.action = "na.fail",
+                data = cwm_urb)
+
+Weights(AICc(modelCWM, modelCWM2, modelCWM3, modelCWM4))
+table <- MuMIn::model.sel(modelCWM, modelCWM2, modelCWM3, modelCWM4)
+table
 
 summary(modelCWM)
 
@@ -158,49 +188,18 @@ c <- c +
     labs(x = "Proportion urbanization (1-km)", y = "Temperature Niche") +
     font_size(title  = 10, axis_title.x = 10, axis_title.y = 10, labels.x = 8, labels.y = 8) + theme_classic()
 
+c
+
 ggsave("CWMniche.png", width = 7, height = 7)
-
-
-
-## Community Weighted Mean Geographic Range Dataframe ##
-
-cwm <- cm_long_urbanization %>% 
-    group_by(Site) %>% 
-    summarise(
-        maxlat_cwm =weighted.mean(max_lat_dif, abundance, na.rm=T)
-    )
-
-cwm_urb <- left_join(cwm, urb)
-modelCWM <- lm(formula = maxlat_cwm ~ Dev_1,
-               na.action = "na.fail",
-               data = cwm_urb)
-
-modelCWM2 <- lm(formula = maxlat_cwm ~ Dev_10,
-                na.action = "na.fail",
-                data = cwm_urb)
-
-AICc(modelCWM, modelCWM2)
-Weights(AICc(modelCWM, modelCWM2))
-
-summary(modelCWM)
-
-b <- sjPlot::plot_model(modelCWM, terms = "Dev_1", type = "pred", title = "")
-
-b + 
-    geom_point(cwm_urb, mapping = aes(x = Dev_10, y = maxlat_cwm)) +
-    labs(x = "Proportion urbanization (1-km)", y = "Max Latitude Difference") +
-    theme_classic()
-
-ggsave("CWMrange.png", width = 7, height = 7)
-
-
-
 
 
 Figure4 <- cowplot::plot_grid(a,b,c, labels = c("A", "B", "C"), label_size = 12)
 Figure4
 
-cowplot::save_plot("New Figues/Figure4_CWM.png", Figure4)
+ggsave("New Figues/Figure4_CWM.png", Figure4,
+       width = 5.5, height = 4)
+
+
 
 
 
